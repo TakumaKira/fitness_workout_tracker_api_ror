@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_26_082700) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_26_090748) do
+  create_table "comments", force: :cascade do |t|
+    t.text "content"
+    t.integer "workout_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_comments_on_user_id"
+    t.index ["workout_id"], name: "index_comments_on_workout_id"
+  end
+
   create_table "exercises", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -58,6 +68,8 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_26_082700) do
     t.index ["user_id"], name: "index_workouts_on_user_id"
   end
 
+  add_foreign_key "comments", "users"
+  add_foreign_key "comments", "workouts"
   add_foreign_key "exercises", "users"
   add_foreign_key "workout_exercises", "exercises"
   add_foreign_key "workout_exercises", "workouts"

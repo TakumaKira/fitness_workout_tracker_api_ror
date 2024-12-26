@@ -6,6 +6,7 @@ Rails.application.routes.draw do
 
     resources :exercises
     resources :workouts do
+      resources :comments
       resources :workout_exercises do
         collection do
           post :batch_create
