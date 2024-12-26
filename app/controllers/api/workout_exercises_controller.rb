@@ -21,6 +21,27 @@ class Api::WorkoutExercisesController < ApplicationController
     end
   end
 
+  def batch_create
+    workout_exercises = params[:workout_exercises].map do |we_params|
+      @workout.workout_exercises.build(
+        exercise_id: we_params[:exercise_id],
+        sets: we_params[:sets],
+        reps: we_params[:reps],
+        weight: we_params[:weight]
+      )
+    end
+
+    if workout_exercises.all?(&:valid?)
+      WorkoutExercise.transaction do
+        workout_exercises.each(&:save!)
+      end
+      render json: workout_exercises, status: :created
+    else
+      errors = workout_exercises.flat_map { |we| we.errors.full_messages }
+      render json: { errors: errors }, status: :unprocessable_entity
+    end
+  end
+
   def update
     if @workout_exercise.update(workout_exercise_params)
       render json: @workout_exercise
