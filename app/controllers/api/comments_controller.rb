@@ -43,7 +43,9 @@ class Api::CommentsController < ApplicationController
   private
 
   def set_workout
-    @workout = Workout.find(params[:workout_id])
+    @workout = current_user.workouts.find(params[:workout_id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Workout not found or access denied" }, status: :not_found
   end
 
   def set_comment
