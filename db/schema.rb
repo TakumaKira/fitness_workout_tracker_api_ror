@@ -10,12 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_26_075128) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_26_081423) do
   create_table "exercises", force: :cascade do |t|
     t.string "name"
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_exercises_on_name"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -43,6 +44,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_26_075128) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["exercise_id"], name: "index_workout_exercises_on_exercise_id"
+    t.index ["workout_id", "exercise_id"], name: "index_workout_exercises_on_workout_id_and_exercise_id"
     t.index ["workout_id"], name: "index_workout_exercises_on_workout_id"
   end
 
