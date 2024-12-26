@@ -31,7 +31,7 @@ module FitnessWorkoutTrackerApiRor
 
     # Enable cookie middleware
     config.middleware.use ActionDispatch::Cookies
-    config.middleware.use ActionDispatch::Session::CookieStore
+    config.middleware.use ActionDispatch::Session::ActiveRecordStore
 
     # Ensure cookies can be used in API mode
     config.api_only = true
