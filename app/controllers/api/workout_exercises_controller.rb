@@ -2,6 +2,7 @@ class Api::WorkoutExercisesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_workout
   before_action :set_workout_exercise, only: [ :show, :update, :destroy ]
+  before_action :validate_exercise_ownership, only: [ :create, :batch_create ]
 
   def index
     workout_exercises = @workout.workout_exercises.includes(:exercise)
@@ -18,6 +19,27 @@ class Api::WorkoutExercisesController < ApplicationController
       render json: workout_exercise, status: :created
     else
       render json: { errors: workout_exercise.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def batch_create
+    workout_exercises = params[:workout_exercises].map do |we_params|
+      @workout.workout_exercises.build(
+        exercise_id: we_params[:exercise_id],
+        sets: we_params[:sets],
+        reps: we_params[:reps],
+        weight: we_params[:weight]
+      )
+    end
+
+    if workout_exercises.all?(&:valid?)
+      WorkoutExercise.transaction do
+        workout_exercises.each(&:save!)
+      end
+      render json: workout_exercises, status: :created
+    else
+      errors = workout_exercises.flat_map { |we| we.errors.full_messages }
+      render json: { errors: errors }, status: :unprocessable_entity
     end
   end
 
@@ -46,5 +68,23 @@ class Api::WorkoutExercisesController < ApplicationController
 
   def workout_exercise_params
     params.require(:workout_exercise).permit(:exercise_id, :sets, :reps, :weight)
+  end
+
+  def validate_exercise_ownership
+    if action_name == "create"
+      exercise = Exercise.find(params[:workout_exercise][:exercise_id])
+      unless exercise.user_id == current_user.id
+        render json: { error: "You can only add your own exercises to workouts" }, status: :forbidden
+        nil
+      end
+    elsif action_name == "batch_create"
+      exercise_ids = params[:workout_exercises].map { |we| we[:exercise_id] }
+      exercises = Exercise.where(id: exercise_ids)
+
+      unless exercises.all? { |e| e.user_id == current_user.id }
+        render json: { error: "You can only add your own exercises to workouts" }, status: :forbidden
+        nil
+      end
+    end
   end
 end
