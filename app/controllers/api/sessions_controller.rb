@@ -3,13 +3,21 @@ class Api::SessionsController < ApplicationController
     user = User.find_by(email: params[:email])
     if user&.authenticate(params[:password])
       session[:user_id] = user.id
-      render json: { status: :created, logged_in: true, user: user }
+      Rails.logger.info "Session created: #{session.inspect}"
+
+      render json: {
+        status: :created,
+        logged_in: true,
+        user: user,
+        session_id: request.session.id
+      }
     else
       render json: { status: :unauthorized, error: "Invalid credentials" }, status: :unauthorized
     end
   end
 
   def destroy
+    Rails.logger.info "Session before destroy: #{session.inspect}"
     session[:user_id] = nil
     render json: { status: :ok, logged_out: true }
   end
