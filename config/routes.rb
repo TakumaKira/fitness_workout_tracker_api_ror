@@ -4,6 +4,9 @@ Rails.application.routes.draw do
     delete "/logout", to: "sessions#destroy"
     get "/logged_in", to: "sessions#logged_in"
 
-    resources :workouts
+    resources :exercises
+    resources :workouts do
+      resources :workout_exercises
+    end
   end
 end

@@ -4,4 +4,5 @@ class User < ApplicationRecord
   validates :password, presence: true, on: :create
 
   has_many :workouts
+  has_many :exercises
 end
